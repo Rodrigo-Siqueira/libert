@@ -32,15 +32,11 @@ $dns = array("HOST" => 'localhost', "USUARIO" => 'root', "SENHA" => '', "BANCODA
 $conectar = mysqli_connect($dns['HOST'], $dns['USUARIO'], $dns['SENHA'], $dns['BANCODADOS']);
 
 $sql = "SELECT id AS codProduto, 
-            descricao,  
-            codBarras,
-            precoVenda,
-            estoque,
-            validade,
-            status
+            descricao,
+            precoVenda
         FROM produtos";
 
-$resultado = mysqli_query($conectar, $sql);
+$resultado = mysqli_query($conectar, $sql)
 
 ?>
 
@@ -83,49 +79,70 @@ $resultado = mysqli_query($conectar, $sql);
         <!-- Main -->
         <div class="w3-row-padding w3-margin-bottom">
 
-            <!-- Listagem de produtos -->
+            <!-- Listagem de Vendas -->
             <div class="w3-container w3-white w3-card-4 w3-margin">
-                <h2>Produtos cadastrados</h2>
+                <h2>Venda</h2>
 
-                <div class="w3-responsive">
-                    <table class="w3-table-all w3-section">
-                        <tr class="w3-teal">
-                            <th>Ações</th>
-                            <th></th>
-                            <th>cód. Produto</th>
-                            <th>Descrição</th>
-                            <th>Código de barras</th>
-                            <th>Preço de venda</th>
-                            <th>Estoque atual</th>
-                            <th>status</th>
-                            <th>Data de validade</th>
-                        </tr>
+                <!-- Lista de itens da venda -->
+                <div class="w3-container w3-light-gray w3-card-4 w3-margin">
+                    <div class="w3-responsive">
+                        <table class="w3-table-all w3-section">
+                            <tr class="w3-teal">
+                                <th>Item</th>
+                                <th>Quantidade</th>
+                                <th>Descrição</th>
+                                <th>Preço UN</th>
+                                <th>Desc.</th>
+                                <th>Total Venda</th>
+                            </tr>
 
-                        <?php
-                        while ($linha = mysqli_fetch_assoc($resultado)) {
-                            $id = $linha['codProduto'];
-                            $descricao = $linha['descricao'];
-                            $codBarras = $linha['codBarras'];
-                            $precoVenda = $linha['precoVenda'];
-                            $estoque = $linha['estoque'];
-                            $validade = implode("/", array_reverse(explode("-",  $linha['validade'])));
-                            $status = $linha['status'];
+                            <?php
+                            #Aqui deve ir todos os produtos adicionados ao carrinho
+                            ?>
+                        </table>
 
-                            print '<tr>';
-                            print "<td><a href='prod_form_edit.php?id={$id}'><i class=' material-icons w3-text-blue'>edit_square</i></a></td>";
-                            print "<td><a href='prod_deleta.php?id={$id}'><i class=' material-icons w3-text-red'>delete_forever</i></a></td>";
-                            print  "<td>{$id}</td>";
-                            print  "<td>{$descricao}</td>";
-                            print  "<td>{$codBarras}</td>";
-                            print  "<td>{$precoVenda}</td>";
-                            print  "<td>{$estoque}</td>";
-                            print  "<td>{$status}</td>";
-                            print  "<td>{$validade}</td>";
-                            print '</tr>';
-                        }
+                    </div>
+                </div>
 
-                        ?>
-                    </table>
+                <!-- Adiciona o produto variveis necessarias para a venda -->
+                <div class="w3-container w3-light-gray w3-card-4 w3-margin">
+                    <form class="w3-container" action="">
+
+                        <div class="w3-row-padding w3-section">
+                            <label class="w3-text-teal" for="status">Selecione o produto</label>
+                            <select class="w3-select w3-border" name="option">
+                                <option value="" disabled selected>Selecione o produto para venda</option>
+                                <?php 
+                                    while ($linha = mysqli_fetch_assoc($resultado)) {
+                                        print "<option value='{$linha['codProduto']}'>{$linha['descricao']}</option>\n";
+                                    }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="w3-row-padding w3-section">
+                            <div class="w3-quarter">
+                                <label class="w3-text-teal" for="codProduto">Cód</label>
+                                <input class="w3-input w3-border" type="text" name="codProduto" id="codProduto" value="" readonly>
+                            </div>
+                            <div class="w3-quarter">
+                                <label class="w3-text-teal" for="precoVenda">Preço UN</label>
+                                <input class="w3-input w3-border" type="text" name="precoVenda" id="precoVenda" value="" readonly>
+                            </div>
+                            <div class="w3-quarter">
+                                <label class="w3-text-teal" for="QtdeVenda">Quantidade</label>
+                                <input class="w3-input w3-border" type="number" name="QtdeVenda" id="QtdeVenda" value="">
+                            </div>
+                            <div class="w3-quarter">
+                                <label class="w3-text-teal" for="desconto">Desconto</label>
+                                <input class="w3-input w3-border" type="number" name="desconto" id="desconto" value="">
+                            </div>
+                        </div>
+                        <div class="w3-section">
+                            <button class="w3-btn w3-section w3-teal"><i class="material-icons">add_shopping_cart</i><b>Adicionar item</b></button>
+                        </div>
+
+                    </form>
                 </div>
             </div>
 

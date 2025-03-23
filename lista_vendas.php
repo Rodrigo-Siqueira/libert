@@ -31,16 +31,11 @@
 $dns = array("HOST" => 'localhost', "USUARIO" => 'root', "SENHA" => '', "BANCODADOS" => 'libertDoces');
 $conectar = mysqli_connect($dns['HOST'], $dns['USUARIO'], $dns['SENHA'], $dns['BANCODADOS']);
 
-$sql = "SELECT id AS codProduto, 
-            descricao,  
-            codBarras,
-            precoVenda,
-            estoque,
-            validade,
-            status
-        FROM produtos";
+$sqlVendas = "SELECT id AS cod_venda, date(data_venda) AS data, valor_total 
+              FROM vendas 
+              ORDER BY data_venda DESC";
 
-$resultado = mysqli_query($conectar, $sql);
+$resultado = mysqli_query($conectar, $sqlVendas);
 
 ?>
 
@@ -85,42 +80,29 @@ $resultado = mysqli_query($conectar, $sql);
 
             <!-- Listagem de produtos -->
             <div class="w3-container w3-white w3-card-4 w3-margin">
-                <h2>Produtos cadastrados</h2>
+                <h2>Vendas realizadas</h2>
 
                 <div class="w3-responsive">
                     <table class="w3-table-all w3-section">
                         <tr class="w3-teal">
                             <th>Ações</th>
                             <th></th>
-                            <th>cód. Produto</th>
-                            <th>Descrição</th>
-                            <th>Código de barras</th>
-                            <th>Preço de venda</th>
-                            <th>Estoque atual</th>
-                            <th>status</th>
-                            <th>Data de validade</th>
+                            <th>cód. venda</th>
+                            <th>Data venda</th>
+                            <th>Total Venda</th>
                         </tr>
 
                         <?php
                         while ($linha = mysqli_fetch_assoc($resultado)) {
-                            $id = $linha['codProduto'];
-                            $descricao = $linha['descricao'];
-                            $codBarras = $linha['codBarras'];
-                            $precoVenda = $linha['precoVenda'];
-                            $estoque = $linha['estoque'];
-                            $validade = implode("/", array_reverse(explode("-",  $linha['validade'])));
-                            $status = $linha['status'];
-
+                            $id = $linha['cod_venda'];
+                            $dataVenda = implode("/", array_reverse(explode("-", $linha['data'])));
+                            $totalVenda = $linha['valor_total'];
                             print '<tr>';
-                            print "<td><a href='prod_form_edit.php?id={$id}'><i class=' material-icons w3-text-blue'>edit_square</i></a></td>";
-                            print "<td><a href='prod_deleta.php?id={$id}'><i class=' material-icons w3-text-red'>delete_forever</i></a></td>";
+                            print "<td><a href='prod_form_edit_venda.php?id={$id}'><i class=' material-icons w3-text-blue'>edit_square</i></a></td>";
+                            print "<td><a href='prod_deleta_venda.php?id={$id}'><i class=' material-icons w3-text-red'>delete_forever</i></a></td>";
                             print  "<td>{$id}</td>";
-                            print  "<td>{$descricao}</td>";
-                            print  "<td>{$codBarras}</td>";
-                            print  "<td>{$precoVenda}</td>";
-                            print  "<td>{$estoque}</td>";
-                            print  "<td>{$status}</td>";
-                            print  "<td>{$validade}</td>";
+                            print  "<td>{$dataVenda}</td>";
+                            print  "<td>{$totalVenda}</td>";
                             print '</tr>';
                         }
 
