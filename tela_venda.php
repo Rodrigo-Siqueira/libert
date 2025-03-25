@@ -112,22 +112,32 @@ $resultado = mysqli_query($conectar, $sql)
                             <label class="w3-text-teal" for="status">Selecione o produto</label>
                             <select class="w3-select w3-border" name="option">
                                 <option value="" disabled selected>Selecione o produto para venda</option>
-                                <?php 
-                                    while ($linha = mysqli_fetch_assoc($resultado)) {
-                                        print "<option value='{$linha['codProduto']}'>{$linha['descricao']}</option>\n";
-                                    }
+                                <?php
+                                while ($linha = mysqli_fetch_assoc($resultado)) {
+                                    print "<option value='{$linha['codProduto']}' data-desc='{$linha['descricao']}' data-preco='{$linha['precoVenda']}'>{$linha['descricao']}</option>\n";
+                                }
                                 ?>
                             </select>
+                            <script>
+                                document.getElementById("produtoSelect").addEventListener("change", function() {
+                                    // Obtém a opção selecionada
+                                    let selectedOption = this.options[this.selectedIndex];
+
+                                    // Preenche os campos com os dados do produto selecionado
+                                    document.getElementById("codProduto").value = selectedOption.value;
+                                    document.getElementById("precoVenda").value = selectedOption.getAttribute("data-preco");
+                                });
+                            </script>
                         </div>
 
                         <div class="w3-row-padding w3-section">
                             <div class="w3-quarter">
                                 <label class="w3-text-teal" for="codProduto">Cód</label>
-                                <input class="w3-input w3-border" type="text" name="codProduto" id="codProduto" value="" readonly>
+                                <input class="w3-input w3-border" type="text" name="codProduto" id="codProduto"  readonly>
                             </div>
                             <div class="w3-quarter">
                                 <label class="w3-text-teal" for="precoVenda">Preço UN</label>
-                                <input class="w3-input w3-border" type="text" name="precoVenda" id="precoVenda" value="" readonly>
+                                <input class="w3-input w3-border" type="text" name="precoVenda" id="precoVenda"  readonly>
                             </div>
                             <div class="w3-quarter">
                                 <label class="w3-text-teal" for="QtdeVenda">Quantidade</label>

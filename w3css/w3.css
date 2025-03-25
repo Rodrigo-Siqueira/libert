@@ -1,4 +1,4 @@
-/* W3.CSS 4.15 December 2020 by Jan Egil and Borge Refsnes */
+/* W3.CSS 5.01 March 14 2025 by Jan Egil and Borge Refsnes */
 html {
     box-sizing: border-box
 }
@@ -990,6 +990,31 @@ a {
     margin-bottom: 16px
 }
 
+.w3-grid {
+    display: grid
+}
+
+.w3-grid-padding {
+    display: grid;
+    gap: 16px
+}
+
+.w3-flex {
+    display: flex
+}
+
+.w3-text-center {
+    text-align: center
+}
+
+.w3-text-bold, .w3-bold {
+    font-weight: bold
+}
+
+.w3-text-italic, .w3-italic {
+    font-style: italic
+}
+
 .w3-code, .w3-codespan {
     font-family: Consolas, "courier new";
     font-size: 16px
@@ -1383,7 +1408,7 @@ a {
 }
 
 /* Colors */
-.w3-amber, .w3-hover-amber:hover {
+.w3-amber, .w3-hover-amber:hover, .w3-warning {
     color: #000 !important;
     background-color: #ffc107 !important
 }
@@ -1393,7 +1418,7 @@ a {
     background-color: #00ffff !important
 }
 
-.w3-blue, .w3-hover-blue:hover {
+.w3-blue, .w3-hover-blue:hover, .w3-info, .w3-primary {
     color: #fff !important;
     background-color: #2196F3 !important
 }
@@ -1468,7 +1493,7 @@ a {
     background-color: #673ab7 !important
 }
 
-.w3-red, .w3-hover-red:hover {
+.w3-red, .w3-hover-red:hover, .w3-danger {
     color: #fff !important;
     background-color: #f44336 !important
 }
@@ -1483,7 +1508,7 @@ a {
     background-color: #009688 !important
 }
 
-.w3-yellow, .w3-hover-yellow:hover {
+.w3-yellow, .w3-hover-yellow:hover, .w3-note {
     color: #000 !important;
     background-color: #ffeb3b !important
 }
@@ -1498,7 +1523,7 @@ a {
     background-color: #000 !important
 }
 
-.w3-grey, .w3-hover-grey:hover, .w3-gray, .w3-hover-gray:hover {
+.w3-grey, .w3-hover-grey:hover, .w3-gray, .w3-hover-gray:hover, .w3-secondary {
     color: #000 !important;
     background-color: #9e9e9e !important
 }
@@ -1511,6 +1536,46 @@ a {
 .w3-dark-grey, .w3-hover-dark-grey:hover, .w3-dark-gray, .w3-hover-dark-gray:hover {
     color: #fff !important;
     background-color: #616161 !important
+}
+
+.w3-asphalt, .w3-hover-asphalt:hover {
+    color: #fff !important;
+    background-color: #343a40 !important
+}
+
+.w3-crimson, .w3-hover-crimson:hover {
+    color: #fff !important;
+    background-color: #a20025 !important
+}
+
+.w3-cobalt, w3-hover-cobalt:hover {
+    color: #fff !important;
+    background-color: #0050ef !important
+}
+
+.w3-emerald, .w3-hover-emerald:hover, .w3-success {
+    color: #fff !important;
+    background-color: #008a00 !important
+}
+
+.w3-olive, .w3-hover-olive:hover {
+    color: #fff !important;
+    background-color: #6d8764 !important
+}
+
+.w3-paper, .w3-hover-paper:hover {
+    color: #000 !important;
+    background-color: #f8f9fa !important
+}
+
+.w3-sienna, .w3-hover-sienna:hover {
+    color: #fff !important;
+    background-color: #a0522d !important
+}
+
+.w3-taupe, .w3-hover-taupe:hover {
+    color: #fff !important;
+    background-color: #87794e !important
 }
 
 .w3-pale-red, .w3-hover-pale-red:hover {
