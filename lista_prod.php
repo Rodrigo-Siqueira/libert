@@ -1,28 +1,23 @@
 <?php
 
-# cria conexão com o banco de dados
-$dns = array("HOST" => 'localhost', "USUARIO" => 'root', "SENHA" => '', "BANCODADOS" => 'merceariaLibert');
-$conectar = mysqli_connect($dns['HOST'], $dns['USUARIO'], $dns['SENHA'], $dns['BANCODADOS']);
+require_once 'classes/Produto.php';
 
-$sql = "SELECT id, 
-            descricao,  
-            codigo_barras,
-            preco_venda,
-            status
-        FROM produtos";
-
-$resultado = mysqli_query($conectar, $sql);
+try {
+    $produtos = Produto::all();
+} catch (Exception $e) {
+    print $e->getMessage();
+}
 
 # Variavel que vai acumular os produtos
-$itens = ''; 
+$itens = '';
 
-while ($linha = mysqli_fetch_assoc($resultado)) {
+foreach ($produtos as $produto) {
     $item = file_get_contents('html/item.html');
-    $item = str_replace('{id}', $linha['id'], $item);
-    $item = str_replace('{descricao}', $linha['descricao'], $item);
-    $item = str_replace('{codigo_barras}', $linha['codigo_barras'], $item);
-    $item = str_replace('{preco_venda}', $linha['preco_venda'], $item);
-    $item = str_replace('{status}', $linha['status'], $item);
+    $item = str_replace('{id}', $produto['id'], $item);
+    $item = str_replace('{descricao}', $produto['descricao'], $item);
+    $item = str_replace('{codigo_barras}', $produto['codigo_barras'], $item);
+    $item = str_replace('{preco_venda}', $produto['preco_venda'], $item);
+    $item = str_replace('{status}', $produto['status'], $item);
 
     $itens .= $item;
 }

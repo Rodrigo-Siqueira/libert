@@ -1,61 +1,26 @@
 <?php
 
+require_once 'classes/Produto.php';
+
 if (!empty($_REQUEST['action'])) {
 
-    # conexão com banco de dados
-    $dns = array("HOST" => 'localhost', "USUARIO" => 'root', "SENHA" => '', "BANCODADOS" => 'merceariaLibert');
-    $conectar = mysqli_connect($dns['HOST'], $dns['USUARIO'], $dns['SENHA'], $dns['BANCODADOS']);
+    try {
 
-    if ($_REQUEST['action'] == 'edit') {
-        $id = $_GET['id'];
-        $resultado = mysqli_query($conectar, "SELECT * FROM produtos WHERE id = '{$id}'");
+        if ($_REQUEST['action'] == 'edit') {
 
-        $produto = mysqli_fetch_assoc($resultado);
-        
-    } elseif ($_REQUEST['action'] == 'salvar') {
+            $id = $_GET['id'];
+            $produto = Produto::find($id);
+        } elseif ($_REQUEST['action'] == 'salvar') {
 
-        if (empty($_POST['id'])) {
             $produto = $_POST;
+            Produto::save($produto);
 
-            $sql = "INSERT INTO produtos (
-                        descricao, 
-                        codigo_barras, 
-                        preco_caixa, 
-                        preco_unitario, 
-                        preco_venda,
-                        quantidade_por_caixa, 
-                        status, 
-                        margem_lucro)
-                    VALUES (
-                        '{$produto['descricao']}',
-                        '{$produto['codigo_barras']}',
-                        '{$produto['preco_caixa']}',
-                        '{$produto['preco_unitario']}',
-                        '{$produto['preco_venda']}',
-                        '{$produto['quantidade_por_caixa']}',
-                        '{$produto['status']}',
-                        '{$produto['margem_lucro']}')";
-
-            $resultado = mysqli_query($conectar, $sql);
-        } else {
-
-            $sql = "UPDATE produtos SET 
-                        descricao =            '{$produto['descricao']}',
-                        codigo_barras =        '{$produto['codigo_barras']}',
-                        preco_caixa =          '{$produto['preco_caixa']}',
-                        preco_unitario =       '{$produto['preco_unitario']}',
-                        preco_venda =          '{$produto['preco_venda']}',
-                        quantidade_por_caixa = '{$produto['quantidade_por_caixa']}',
-                        status =               '{$produto['status']}',
-                        margem_lucro =         '{$produto['margem_lucro']}'
-                    WHERE id =   '{$produto['id']}'";
-
-            $resultado = mysqli_query($conectar, $sql);
+            print '<script>alert("Produto salvo com sucesso!");</script>';
         }
-
-        print ($resultado) ? 'Registro salvo com sucesso.' : mysqli_error($conectar);
-        mysqli_close($conectar);
+    } catch (Exception $e) {
+        print $e->getMessage();
     }
+
 } else {
 
     # Senão houver uma requisição action 
