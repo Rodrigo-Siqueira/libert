@@ -27,10 +27,12 @@ CREATE TABLE produtos (
 CREATE TABLE lotes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     produto_id INT NOT NULL,
+    compra_id INT NOT NULL, -- Relacionamento com a compra
     data_validade DATE,
-    data_recebimento DATE,
+    data_recebimento DATE DEFAULT CURRENT_DATE,
     quantidade INT NOT NULL DEFAULT 0,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    FOREIGN KEY (compra_id) REFERENCES compras(id) ON DELETE CASCADE
 );
 
 -- Tabela de Compras (Registro de compras)
@@ -39,7 +41,7 @@ CREATE TABLE compras (
     produto_id INT NOT NULL,
     quantidade_caixas INT NOT NULL,
     preco_caixa DECIMAL(10,2) NOT NULL,
-    custo_total DECIMAL(10,2) GENERATED ALWAYS AS (quantidade_caixas * preco_caixa) STORED, -- Armazena o custo total
+    custo_total DECIMAL(10,2) NOT NULL, 
     data_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
@@ -94,20 +96,6 @@ CREATE TABLE movimentacao_estoque (
     data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
-
--- Trigger para registrar entrada de estoque ao comprar
-DELIMITER //
-CREATE TRIGGER after_compra_insert
-AFTER INSERT ON compras
-FOR EACH ROW
-BEGIN
-    UPDATE estoque SET quantidade = quantidade + (NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id))
-    WHERE produto_id = NEW.produto_id;
-    
-    INSERT INTO movimentacao_estoque (produto_id, tipo, quantidade, motivo)
-    VALUES (NEW.produto_id, 'entrada', NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id), 'Compra');
-END;//
-DELIMITER ;
 
 -- Ideia de atualização de Compra
 DELIMITER //

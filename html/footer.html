@@ -1,0 +1,34 @@
+<!-- Rodapé -->
+<footer class="w3-container w3-padding-16 w3-teal">
+    <h4>Sistema Libert</h4>
+    <p>Feito utilisando template do <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+</footer>
+</div>
+
+<script>
+    // Aparece a Sidebar
+    var mySidebar = document.getElementById("mySidebar");
+
+    // Aparece o efeito de sobreposição da DIV
+    var overlayBg = document.getElementById("myOverlay");
+
+    // Alterne entre mostrar e ocultar a barra lateral e adicione efeito de sobreposição
+    function w3_open() {
+        if (mySidebar.style.display === 'block') {
+            mySidebar.style.display = 'none';
+            overlayBg.style.display = "none";
+        } else {
+            mySidebar.style.display = 'block';
+            overlayBg.style.display = "block";
+        }
+    }
+
+    // Feche a barra lateral com o botão Fechar
+    function w3_close() {
+        mySidebar.style.display = "none";
+        overlayBg.style.display = "none";
+    }
+</script>
+</body>
+
+</html>
