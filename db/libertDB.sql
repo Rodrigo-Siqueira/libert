@@ -27,9 +27,9 @@ CREATE TABLE produtos (
 CREATE TABLE lotes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     produto_id INT NOT NULL,
-    compra_id INT NOT NULL, -- Relacionamento com a compra
-    data_validade DATE,
-    data_recebimento DATE DEFAULT CURRENT_DATE,
+    compra_id INT NOT NULL, 
+    data_validade DATE,     
+    data_recebimento DATE , 
     quantidade INT NOT NULL DEFAULT 0,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
     FOREIGN KEY (compra_id) REFERENCES compras(id) ON DELETE CASCADE
@@ -37,12 +37,20 @@ CREATE TABLE lotes (
 
 -- Tabela de Compras (Registro de compras)
 CREATE TABLE compras (
+    id INT AUTO_INCREMENT PRIMARY KEY,                
+    valor_total DECIMAL(10, 2) NOT NULL,
+    data_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Itens Comprados em Cada Compra
+CREATE TABLE compra_itens (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    produto_id INT NOT NULL,
-    quantidade_caixas INT NOT NULL,
-    preco_caixa DECIMAL(10,2) NOT NULL,
-    custo_total DECIMAL(10,2) NOT NULL, 
-    data_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    compra_id INT NOT NULL,
+    produto_id INT NOT NULL,              
+    quantidade_caixas INT NOT NULL,       
+    preco_caixa DECIMAL(10, 2) NOT NULL,  
+    custo_total DECIMAL(10, 2) NOT NULL,  
+    FOREIGN KEY (compra_id) REFERENCES compras(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
 
@@ -53,6 +61,43 @@ CREATE TABLE estoque (
     quantidade INT NOT NULL DEFAULT 0,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
+
+-- Tabela de Ajuste de Estoque
+CREATE TABLE ajuste_estoque (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo INT NOT NULL,
+    descricao VARCHAR (150) NOT NULL
+);
+
+-- Tabela de Movimentação de Estoque
+CREATE TABLE movimentacao_estoque (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT NOT NULL,
+    ajuste_id INT NOT NULL,
+    tipo ENUM('entrada', 'saida') NOT NULL,
+    quantidade INT NOT NULL,
+    data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,    
+    FOREIGN KEY (ajuste_id) REFERENCES ajuste_estoque(id)
+);
+
+-- Ideia de atualização de Compra
+DELIMITER //
+CREATE TRIGGER after_compra_item_insert
+AFTER INSERT ON compra_itens
+FOR EACH ROW
+BEGIN
+    -- Inserir ou atualizar o estoque
+    INSERT INTO estoque (produto_id, quantidade)
+    VALUES (NEW.produto_id, (NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id)))
+    ON DUPLICATE KEY UPDATE quantidade = quantidade + (NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id));
+
+    -- Registrar movimentação de estoque
+    INSERT INTO movimentacao_estoque (produto_id, ajuste_id, tipo, quantidade)
+    VALUES (NEW.produto_id, (SELECT id FROM ajuste_estoque WHERE descricao = 'Compra'), 'entrada', NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id));
+END;
+//
+DELIMITER ;
 
 -- Tabela de Vendas
 CREATE TABLE vendas (
@@ -68,7 +113,7 @@ CREATE TABLE venda_itens (
     produto_id INT NOT NULL,
     quantidade INT NOT NULL,
     preco_unitario DECIMAL(10,2) NOT NULL,
-    descontoAplicado DECIMAL(5,2) DEFAULT 0.00,
+    descontoAplicado DECIMAL(10,2) DEFAULT 0.00,
     FOREIGN KEY (venda_id) REFERENCES vendas(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
@@ -86,35 +131,6 @@ CREATE TABLE vendas_canceladas (
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
 
--- Tabela de Movimentação de Estoque
-CREATE TABLE movimentacao_estoque (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    produto_id INT NOT NULL,
-    tipo ENUM('entrada', 'saida', 'ajuste') NOT NULL,
-    quantidade INT NOT NULL,
-    motivo ENUM('Compra', 'Venda', 'Furto', 'Ajuste Manual', 'Outro') NOT NULL,
-    data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
-);
-
--- Ideia de atualização de Compra
-DELIMITER //
-CREATE TRIGGER after_compra_insert
-AFTER INSERT ON compras
-FOR EACH ROW
-BEGIN
-    -- Insere se não existir ou atualiza se já existir
-    INSERT INTO estoque (produto_id, quantidade)
-    VALUES (NEW.produto_id, (NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id)))
-    ON DUPLICATE KEY UPDATE quantidade = quantidade + (NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id));
-
-    -- Registra a movimentação
-    INSERT INTO movimentacao_estoque (produto_id, tipo, quantidade, motivo)
-    VALUES (NEW.produto_id, 'entrada', NEW.quantidade_caixas * (SELECT quantidade_por_caixa FROM produtos WHERE id = NEW.produto_id), 'Compra');
-END;
-//
-DELIMITER ;
-
 
 -- Trigger para registrar saída de estoque ao vender
 DELIMITER //
@@ -125,25 +141,26 @@ BEGIN
     UPDATE estoque SET quantidade = quantidade - NEW.quantidade
     WHERE produto_id = NEW.produto_id;
     
-    INSERT INTO movimentacao_estoque (produto_id, tipo, quantidade, motivo)
-    VALUES (NEW.produto_id, 'saida', NEW.quantidade, 'Venda');
+    INSERT INTO movimentacao_estoque (produto_id, ajuste_id, tipo, quantidade)
+    VALUES (NEW.produto_id, (SELECT id FROM ajuste_estoque WHERE descricao = 'Venda'), 'saida', NEW.quantidade);
 END;//
 DELIMITER ;
 
--- Atualizando o Trigger para Cancelamento de Vendas
 DELIMITER //
 CREATE TRIGGER after_venda_item_delete
 AFTER DELETE ON venda_itens
 FOR EACH ROW
 BEGIN
-    -- Restaurar o estoque
+    -- Restaurar estoque
     UPDATE estoque 
     SET quantidade = quantidade + OLD.quantidade
     WHERE produto_id = OLD.produto_id;
 
-    -- Registrar no histórico de movimentação de estoque
-    INSERT INTO movimentacao_estoque (produto_id, tipo, quantidade, motivo)
-    VALUES (OLD.produto_id, 'entrada', OLD.quantidade, 'Ajuste Manual');
+    -- Registrar movimentação
+    IF (SELECT COUNT(*) FROM ajuste_estoque WHERE descricao = 'venda cancelada') > 0 THEN
+        INSERT INTO movimentacao_estoque (produto_id, ajuste_id, tipo, quantidade)
+        VALUES (OLD.produto_id, (SELECT id FROM ajuste_estoque WHERE descricao = 'venda cancelada'), 'entrada', OLD.quantidade);
+    END IF;
 
     -- Salvar no histórico de vendas canceladas
     INSERT INTO vendas_canceladas (venda_id, produto_id, quantidade, preco_unitario, descontoAplicado)

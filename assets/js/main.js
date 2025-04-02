@@ -23,6 +23,16 @@ function calculaPrecoUn() {
     calculaPrecoVenda();
 }
 
+function calculacompra() {
+    let precoCompra = parseFloat(document.getElementById("preco_caixa").value) || 0;
+    let qtdeDeCaixa = parseFloat(document.getElementById("quantidade_de_caixa").value) || 0;
+
+    let valorTotal = precoCompra * qtdeDeCaixa;
+    document.getElementById("custo_total").value = valorTotal.toFixed(2);
+
+    calculaPrecoUn();
+}
+
 function calculaPrecoVenda() {
     let precoUnCompra = parseFloat(document.getElementById("preco_unitario").value) || 0;
     let margemVenda = parseFloat(document.getElementById("margem_lucro").value) || 0;
@@ -32,4 +42,3 @@ function calculaPrecoVenda() {
 
     document.getElementById("preco_venda").value = precoVenda.toFixed(2);
 }
-
